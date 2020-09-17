@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'quiz_brain.dart';
 
@@ -29,6 +30,48 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = [];
+
+  void checkAnswer(bool userPickedAnswer) {
+    bool correctAnswer = quizBrain.getQuestionAnswer();
+    Icon correct = Icon(Icons.check);
+    if (!quizBrain.isFinished()) {
+      setState(() {
+        if (userPickedAnswer == correctAnswer) {
+          scoreKeeper.add(Icon(Icons.check, color: Colors.green));
+        } else {
+          scoreKeeper.add(Icon(Icons.close, color: Colors.red));
+        }
+
+        quizBrain.nextQuestion();
+      });
+    } else {
+      Alert(
+        context: context,
+        type: AlertType.info,
+        title: "Quizzler",
+        desc: "You have reached the last question.",
+        buttons: [
+          DialogButton(
+            child: Text(
+              "Acept",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+              ),
+            ),
+            onPressed: () {
+              setState(() {
+                quizBrain.reset();
+                scoreKeeper.clear();
+                Navigator.pop(context);
+              });
+            },
+            width: 120,
+          )
+        ],
+      ).show();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,15 +109,8 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
+                checkAnswer(true);
                 //The user picked true.
-                if (quizBrain.getQuestionAnswer()) {
-                  print("User got it right");
-                } else {
-                  print('User got it wrong');
-                }
-                setState(() {
-                  quizBrain.nextQuestion();
-                });
               },
             ),
           ),
@@ -92,14 +128,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                if (!quizBrain.getQuestionAnswer()) {
-                  print("User got it right");
-                } else {
-                  print('User got it wrong');
-                }
-                setState(() {
-                  quizBrain.nextQuestion();
-                });
+                checkAnswer(false);
                 //The user picked false.
               },
             ),
